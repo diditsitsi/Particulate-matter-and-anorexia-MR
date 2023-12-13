@@ -1,0 +1,167 @@
+setwd (" ")
+> library(TwoSampleMR)
+TwoSampleMR version 0.5.8 
+[>] New: Option to use non-European LD reference panels for clumping etc
+[>] Some studies temporarily quarantined to verify effect allele
+[>] See news(package='TwoSampleMR') and https://gwas.mrcieu.ac.uk for further details
+
+> ao <-available_outcomes()
+API: public: http://gwas-api.mrcieu.ac.uk/
+> exposure_dat <-extract_instruments("ukb-b-10817")
+>  outcome_dat <- read_outcome_data(
++   snps = exposure_dat$SNP,
++   filename = "Anorexia.tsv",
++   sep = "\t",
++   snp_col = "ID", 
++   beta_col = "BETA",
++   se_col = "SE", 
++   effect_allele_col = "ALT",
++   other_allele_col = "REF",
++   eaf_col = " ",
++   pval_col = "PVAL", 
++   chr_col =  "CHROM",
++   pos_col = "POS"
++ )
+|--------------------------------------------------|
+|==================================================|
+No phenotype name specified, defaulting to 'outcome'.
+Warning message:
+In format_data(as.data.frame(outcome_dat), type = "outcome", snps = snps,  :
+  The following columns are not present but are helpful for harmonisation
+ 
+
+> View(outcome_dat)
+> outcome_dat$outcome <- "Anorexia"
+dat <- harmonise_data(exposure_dat, outcome_dat, action = 3)
+Harmonising Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 (ukb-b-10817) and Anorexia (UbpTsQ)
+Removing the following SNPs for being palindromic:
+rs114708313
+> res <- mr(dat)
+Analysing 'ukb-b-10817' on 'UbpTsQ'
+> View(res)
+> generate_odds_ratios(mr_res=res)
+  id.exposure id.outcome  outcome                                                         exposure                    method nsnp
+1 ukb-b-10817     UbpTsQ Anorexia Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817                  MR Egger    6
+2 ukb-b-10817     UbpTsQ Anorexia Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817           Weighted median    6
+3 ukb-b-10817     UbpTsQ Anorexia Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 Inverse variance weighted    6
+4 ukb-b-10817     UbpTsQ Anorexia Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817               Simple mode    6
+5 ukb-b-10817     UbpTsQ Anorexia Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817             Weighted mode    6
+          b        se        pval      lo_ci     up_ci        or     or_lci95    or_uci95
+1 1.1939849 4.8265665 0.816794724 -8.2660853 10.654055  3.300206 0.0002570897 42364.03943
+2 1.8822637 0.7243589 0.009362556  0.4625203  3.302007  6.568357 1.5880714228    27.16711
+3 0.6593961 1.1524555 0.567209378 -1.5994167  2.918209  1.933624 0.2020143257    18.50811
+4 2.4366043 0.7520008 0.022945135  0.9626827  3.910526 11.434148 2.6187122274    49.92520
+5 2.3165430 0.7824235 0.031492400  0.7829930  3.850093 10.140558 2.1880111353    46.99743
+> mr_heterogeneity(dat)
+  id.exposure id.outcome  outcome                                                         exposure                    method        Q
+1 ukb-b-10817     UbpTsQ Anorexia Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817                  MR Egger 28.26990
+2 ukb-b-10817     UbpTsQ Anorexia Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 Inverse variance weighted 28.36323
+  Q_df       Q_pval
+1    4 1.099639e-05
+2    5 3.090546e-05
+> mr_pleiotropy_test(dat)
+  id.exposure id.outcome  outcome                                                         exposure egger_intercept         se      pval
+1 ukb-b-10817     UbpTsQ Anorexia Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817    -0.007890171 0.06866025 0.9140492
+> MRPRESSO::mr_presso(BetaExposure = 'beta.exposure', SdExposure = 'se.exposure',
++                     BetaOutcome = 'beta.outcome', SdOutcome = 'se.outcome', data = dat, OUTLIERtest = TRUE, DISTORTIONtest = TRUE, 
++                     SignifThreshold = 0.05, NbDistribution = 1000)
+$`Main MR results`
+       Exposure       MR Analysis Causal Estimate       Sd    T-stat   P-value
+1 beta.exposure               Raw       0.2161913 1.035511 0.2087774 0.8415294
+2 beta.exposure Outlier-corrected       0.4443467 1.080747 0.4111477 0.7020378
+
+$`MR-PRESSO results`
+$`MR-PRESSO results`$`Global Test`
+$`MR-PRESSO results`$`Global Test`$RSSobs
+[1] 45.00483
+
+$`MR-PRESSO results`$`Global Test`$Pvalue
+[1] "<0.001"
+
+
+$`MR-PRESSO results`$`Outlier Test`
+        RSSobs Pvalue
+1 0.0039678854  0.105
+2 0.0045191956  0.077
+3 0.0028893934 <0.007
+4 0.0004735566  0.777
+5 0.0015407611  0.042
+6 0.0009083140  0.294
+7 0.0092309745  0.105
+
+$`MR-PRESSO results`$`Distortion Test`
+$`MR-PRESSO results`$`Distortion Test`$`Outliers Indices`
+[1] 3 5
+
+$`MR-PRESSO results`$`Distortion Test`$`Distortion Coefficient`
+beta.exposure 
+    -51.34624 
+
+$`MR-PRESSO results`$`Distortion Test`$Pvalue
+[1] 0.599
+
+
+
+> View(dat)
+mr_leaveoneout(dat, parameters = default_parameters(), method = mr_ivw)
+                                                          exposure  outcome id.exposure id.outcome samplesize        SNP         b
+1 Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 Anorexia ukb-b-10817     UbpTsQ         NA rs12203592 1.1750062
+2 Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 Anorexia ukb-b-10817     UbpTsQ         NA  rs1372504 1.5359119
+3 Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 Anorexia ukb-b-10817     UbpTsQ         NA  rs1537371 0.4073914
+4 Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 Anorexia ukb-b-10817     UbpTsQ         NA  rs6749467 0.2088578
+5 Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 Anorexia ukb-b-10817     UbpTsQ         NA rs77205736 0.3352233
+6 Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 Anorexia ukb-b-10817     UbpTsQ         NA rs77255816 0.2798586
+7 Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817 Anorexia ukb-b-10817     UbpTsQ         NA        All 0.6593961
+         se         p
+1 1.2046344 0.3293595
+2 0.9471377 0.1048815
+3 1.4091427 0.7725003
+4 1.2950078 0.8718735
+5 1.3740772 0.8072599
+6 1.3001058 0.8295659
+7 1.1524555 0.5672094
+
+ res_loo <- mr_leaveoneout(dat)
+> p3 <- mr_leaveoneout_plot(res_loo)
+> p3[[1]]
+
+> p1[[1]]
+> p2 <-mr_singlesnp(dat)
+> p2[[1]]
+[1] "Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817"
+[2] "Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817"
+[3] "Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817"
+[4] "Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817"
+[5] "Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817"
+[6] "Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817"
+[7] "Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817"
+[8] "Particulate matter air pollution (pm2.5); 2010 || id:ukb-b-10817"
+> p4 <- mr_forest_plot(singlesnp_results = mr_singlesnp(dat))
+> p4 [[1]]
+
+MRInputObject <- mr_input(bx = dat$beta.exposure, 
++                           bxse = dat$se.exposure, 
++                           by = dat$beta.outcome, 
++                           byse = dat$se.outcome)
+> View(MRInputObject)
+> class(MRInputObject)
+[1] "MRInput"
+attr(,"package")
+[1] "MendelianRandomization"
+mr_lasso(MRInputObject)
+MR-Lasso method 
+
+Number of variants : 7 
+Number of valid instruments : 4 
+Tuning parameter : 0.9065042 
+------------------------------------------------------------------
+ Exposure Estimate Std Error 95% CI       p-value
+ exposure    2.359     0.583 1.215, 3.502   0.000
+------------------------------------------------------------------
+> 
+
+#PM10 (exposure = ukb-b-589)
+dat <- harmonise_data(exposure_dat, outcome_dat, action = 3)
+Harmonising Particulate matter air pollution (pm10); 2007 || id:ukb-b-589 (ukb-b-589) and Anorexia (GOWQ9a)
+Removing the following SNPs for being palindromic:
+rs6867849, rs74805019
